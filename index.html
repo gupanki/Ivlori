@@ -210,7 +210,7 @@
         </div>
         <div><label data-i18n="form.country">Země</label><input id="f-country"></div>
         <div><label data-i18n="form.message">Zpráva</label><textarea id="f-message"></textarea></div>
-        <button type="submit" class="btn-primary pill" style="width:fit-content;" data-i18n="form.submit">Odeslat poptávku</button>
+        <button type="submit" class="btn-primary pill" style="width:fit-content;" id="submitBtn" data-i18n="form.submit">Odeslat poptávku</button>
         <div class="status" id="enquiryStatus"></div>
       </form>
     </div>
@@ -252,7 +252,10 @@ const i18n = {
     "contact.sub":"Pouze pro ověřené obchodní partnery. Napište nám, co hledáte, a ozveme se přímo.",
     "contact.city":"Praha · Česká republika",
     "form.name":"Jméno","form.company":"Společnost","form.country":"Země","form.message":"Zpráva","form.submit":"Odeslat poptávku",
-    "form.status":"Otevírá se váš e-mailový klient s předvyplněnou zprávou pro contact@ivlori.com."
+    "form.status":"Otevírá se váš e-mailový klient s předvyplněnou zprávou pro contact@ivlori.com.",
+    "form.sending":"Odesílání…",
+    "form.success":"Poptávka odeslána — brzy se ozveme.",
+    "form.error":"Něco se nepovedlo. Napište prosím přímo na contact@ivlori.com.",
   },
   en: {
     "nav.catalogue":"Catalogue","nav.assurance":"Assurance","nav.contact":"Contact","nav.cta":"Request Access",
@@ -272,7 +275,10 @@ const i18n = {
     "contact.sub":"Verified trade buyers only. Tell us what you're looking for and we'll follow up directly.",
     "contact.city":"Prague · Czech Republic",
     "form.name":"Name","form.company":"Company","form.country":"Country","form.message":"Message","form.submit":"Send Enquiry",
-    "form.status":"Opening your email client with a pre-filled message to contact@ivlori.com."
+    "form.status":"Opening your email client with a pre-filled message to contact@ivlori.com.",
+    "form.sending":"Sending…",
+    "form.success":"Enquiry sent — we'll be in touch shortly.",
+    "form.error":"Something went wrong sending this. Please email contact@ivlori.com directly.",
   }
 };
 
@@ -375,27 +381,41 @@ function openModal(code){
 function closeModal(){
   document.getElementById('modalBackdrop').classList.remove('open');
 }
-function submitEnquiry(e){
+async function submitEnquiry(e){
   e.preventDefault();
   const name = document.getElementById('f-name').value.trim();
   const company = document.getElementById('f-company').value.trim();
   const country = document.getElementById('f-country').value.trim();
   const message = document.getElementById('f-message').value.trim();
+  const btn = document.getElementById('submitBtn');
+  const status = document.getElementById('enquiryStatus');
 
-  const subject = `Catalogue enquiry — ${name || 'Ivlori website'}`;
-  const bodyLines = [
-    `Name: ${name}`,
-    `Company: ${company || '—'}`,
-    `Country: ${country || '—'}`,
-    ``,
-    `Message:`,
-    message || '—'
-  ];
-  const mailto = `mailto:contact@ivlori.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyLines.join('\n'))}`;
-  window.location.href = mailto;
+  btn.disabled = true;
+  status.textContent = i18n[lang]['form.sending'];
 
-  document.getElementById('enquiryStatus').textContent = i18n[lang]['form.status'];
-  e.target.reset();
+  try {
+    const res = await fetch('/api/sendEnquiry', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        Name: name,
+        Company: company || '—',
+        Country: country || '—',
+        Message: message || '—'
+      })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      status.textContent = i18n[lang]['form.success'];
+      e.target.reset();
+    } else {
+      status.textContent = i18n[lang]['form.error'];
+    }
+  } catch (err) {
+    status.textContent = i18n[lang]['form.error'];
+  } finally {
+    btn.disabled = false;
+  }
 }
 
 buildHeroCollage();
