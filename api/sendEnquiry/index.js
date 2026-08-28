@@ -10,10 +10,14 @@ module.exports = async function (context, req) {
     return;
   }
 
-  const { Name, Company, Country, Message } = req.body || {};
+  const { Name, Company, Email, Phone, Country, Message } = req.body || {};
 
   if (!Name || !String(Name).trim()) {
     context.res = { status: 400, body: { success: false, error: "Name is required." } };
+    return;
+  }
+  if (!Email || !String(Email).trim()) {
+    context.res = { status: 400, body: { success: false, error: "Email is required." } };
     return;
   }
 
@@ -26,13 +30,15 @@ module.exports = async function (context, req) {
         plainText:
           `Name: ${Name}\n` +
           `Company: ${Company || "—"}\n` +
+          `Email: ${Email}\n` +
+          `Phone: ${Phone || "—"}\n` +
           `Country: ${Country || "—"}\n\n` +
           `Message:\n${Message || "—"}`
       },
       recipients: {
         to: [{ address: "contact@ivlori.com" }]
       },
-      replyTo: [{ address: senderAddress }]
+      replyTo: [{ address: Email, displayName: Name }]
     };
 
     const poller = await client.beginSend(message);
