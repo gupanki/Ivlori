@@ -205,12 +205,12 @@
       </div>
       <form onsubmit="submitEnquiry(event)" id="enquiryForm">
         <div class="field-row">
-          <div><label data-i18n="form.name">Jméno</label><input required id="f-name"></div>
+          <div><label data-i18n="form.name">Jméno *</label><input required id="f-name"></div>
           <div><label data-i18n="form.company">Společnost</label><input id="f-company"></div>
         </div>
         <div class="field-row">
-          <div><label data-i18n="form.email">E-mail</label><input type="email" required id="f-email"></div>
-          <div><label data-i18n="form.phone">Telefon</label><input type="tel" id="f-phone"></div>
+          <div><label data-i18n="form.email">E-mail *</label><input type="email" required id="f-email"></div>
+          <div><label data-i18n="form.phone">Telefon *</label><input type="tel" required id="f-phone"></div>
         </div>
         <div><label data-i18n="form.country">Země</label><input id="f-country"></div>
         <div><label data-i18n="form.message">Zpráva</label><textarea id="f-message"></textarea></div>
@@ -255,7 +255,7 @@ const i18n = {
     "contact.eyebrow":"Kontakt","contact.headline":"Požádejte o přístup k celému katalogu.",
     "contact.sub":"Pouze pro ověřené obchodní partnery. Napište nám, co hledáte, a ozveme se přímo.",
     "contact.city":"Praha · Česká republika",
-    "form.name":"Jméno","form.company":"Společnost","form.email":"E-mail","form.phone":"Telefon","form.country":"Země","form.message":"Zpráva","form.submit":"Odeslat poptávku",
+    "form.name":"Jméno *","form.company":"Společnost","form.email":"E-mail *","form.phone":"Telefon *","form.country":"Země","form.message":"Zpráva","form.submit":"Odeslat poptávku",
     "form.status":"Otevírá se váš e-mailový klient s předvyplněnou zprávou pro contact@ivlori.com.",
     "form.sending":"Odesílání…",
     "form.success":"Poptávka odeslána — brzy se ozveme.",
@@ -278,7 +278,7 @@ const i18n = {
     "contact.eyebrow":"Contact","contact.headline":"Request access to the full catalogue.",
     "contact.sub":"Verified trade buyers only. Tell us what you're looking for and we'll follow up directly.",
     "contact.city":"Prague · Czech Republic",
-    "form.name":"Name","form.company":"Company","form.email":"Email","form.phone":"Phone","form.country":"Country","form.message":"Message","form.submit":"Send Enquiry",
+    "form.name":"Name *","form.company":"Company","form.email":"Email *","form.phone":"Phone *","form.country":"Country","form.message":"Message","form.submit":"Send Enquiry",
     "form.status":"Opening your email client with a pre-filled message to contact@ivlori.com.",
     "form.sending":"Sending…",
     "form.success":"Enquiry sent — we'll be in touch shortly.",
