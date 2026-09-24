@@ -1,10 +1,12 @@
 const { EmailClient } = require("@azure/communication-email");
+const { TableClient } = require("@azure/data-tables");
 
 module.exports = async function (context, req) {
-  const connectionString = process.env.ACS_CONNECTION_STRING;
-  const senderAddress = process.env.ACS_SENDER_ADDRESS; // e.g. DoNotReply@xxxxx.azurecomm.net
+  const acsConnectionString = process.env.ACS_CONNECTION_STRING;
+  const senderAddress = process.env.ACS_SENDER_ADDRESS;
+  const tableConnectionString = process.env.TABLE_STORAGE_CONNECTION_STRING;
 
-  if (!connectionString || !senderAddress) {
+  if (!acsConnectionString || !senderAddress) {
     context.log.error("Missing ACS_CONNECTION_STRING or ACS_SENDER_ADDRESS app settings.");
     context.res = { status: 500, body: { success: false, error: "Email service not configured." } };
     return;
@@ -21,8 +23,33 @@ module.exports = async function (context, req) {
     return;
   }
 
+  // Step 1: Save to Table Storage (best-effort — a failure here does NOT block the email)
+  if (tableConnectionString) {
+    try {
+      const tableClient = TableClient.fromConnectionString(tableConnectionString, "enquiries");
+      await tableClient.createTable(); // no-op if it already exists
+      const now = new Date();
+      await tableClient.createEntity({
+        partitionKey: now.toISOString().slice(0, 7), // groups rows by year-month, e.g. "2026-09"
+        rowKey: `${now.getTime()}-${Math.random().toString(36).slice(2, 8)}`,
+        name: Name,
+        company: Company || "",
+        email: Email,
+        phone: Phone || "",
+        country: Country || "",
+        message: Message || "",
+        submittedAt: now.toISOString()
+      });
+    } catch (err) {
+      context.log.error("Table storage write failed (non-blocking):", err);
+    }
+  } else {
+    context.log.warn("TABLE_STORAGE_CONNECTION_STRING not set — skipping storage write.");
+  }
+
+  // Step 2: Send the email notification (unchanged behavior from before)
   try {
-    const client = new EmailClient(connectionString);
+    const client = new EmailClient(acsConnectionString);
     const message = {
       senderAddress: senderAddress,
       content: {
